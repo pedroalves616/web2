@@ -25,7 +25,53 @@
       </b-form-group>
 
       <b-button type="submit" variant="primary">Submit</b-button>
+      <b-button type="button" v-b-modal.modal-1 variant="info">Submit</b-button>
     </b-form>
+
+    <b-modal id="modal-1" title="BootstrapVue">
+      <b-form v-if="show">
+
+            <b-form-group id="input-group-2" label="Your Name:" label-for="input-2">
+                <b-form-input
+                id="input-2"
+                v-model="form.cadastro.nome"
+                placeholder="Enter nome"
+                required
+                ></b-form-input>
+            </b-form-group>
+
+            <b-form-group id="input-group-2" label="Your Password:" label-for="input-2">
+                <b-form-input
+                id="input-2"
+                v-model="form.cadastro.password"
+                placeholder="Enter password"
+                required
+                ></b-form-input>
+            </b-form-group>
+            
+            <b-form-group id="input-group-2" label="Your Login:" label-for="input-2">
+                <b-form-input
+                id="input-2"
+                v-model="form.cadastro.login"
+                placeholder="Enter login"
+                required
+                ></b-form-input>
+            </b-form-group>
+
+             <b-form-group id="input-group-2" label="Your idequipe:" label-for="input-2">
+                <b-form-input
+                id="input-2"
+                v-model="form.cadastro.idequipe"
+                placeholder="Enter idequipe"
+                type="number"
+                required
+                ></b-form-input>
+            </b-form-group>
+
+            <b-button type="submit" variant="primary" @click="adicionarNovoUsuario()">Submit</b-button>
+            <b-button type="reset" variant="danger">Reset</b-button>
+            </b-form>
+    </b-modal>
   </div>
 </template>
 
@@ -40,11 +86,15 @@
             password: '',
           },
           cadastro:{
-            email: '',
+            nome: '',
             password: '',
+            login: '',
+            idequipe: ''
           }
         },
-        show: true
+        show: true,
+        infoUsers: null,
+        login: ''
       }
     },
     methods: {
@@ -56,15 +106,28 @@
           console.log(baseURI)
           console.log(result.data)
           var arr = result.data
+          this.infoUsers = arr
           for (var index = 0; index < arr.length; index++) {
             if(arr[index].login == this.form.login.email && arr[index].login == this.form.login.password){
               console.log('ok')
-              this.$router.push({name: 'Home'})
+              
+              this.login = 1
             }
             else{
-              console.log('no')
+              if(this.login != 1){
+                this.login = 0
+              }
             }
+            
           }
+          console.log(this.infoUsers)
+          if(this.login == 1){
+            this.$router.push({name: 'Home'})
+          }
+          else{
+            alert('Não foi possivel logar')
+          }
+         
         })
         //alert(JSON.stringify(this.form))
       },
@@ -78,7 +141,45 @@
         this.$nextTick(() => {
           this.show = true
         })
-      }
+      },
+      adicionarNovoUsuario(){
+        this.$http.post(process.env.VUE_APP_ENDPOINT + '/usuarios', 
+            {
+                nome: this.form.cadastro.nome, 
+                password: this.form.cadastro.password,
+                login: this.form.cadastro.login,
+                idequipe: this.form.cadastro.idequipe,
+                ativo: 1
+            }
+        )
+
+        this.$bvModal.hide('modal-1')
+
+        this.$http.get(process.env.VUE_APP_ENDPOINT + '/usuarios')
+        .then((result) => {
+          
+          console.log(result.data)
+          this.infoUsers = result.data
+          var arr = this.infoUsers
+          for (let i = 0; i < arr.length; i++) {
+              var equip;
+              if(arr[i].m2_equipe.nome){
+                  equip = arr[i].m2_equipe.nome;
+              }
+              else{
+                  equip = "sem equipe"
+              }
+              var obj = {
+                  Id: arr[i].id,
+                  Nome: arr[i].nome,
+                  Equipe: equip,
+                  Ativo: arr[i].ativo
+              }
+              this.items.push(obj)
+             
+          }
+        })
+      },
     }
   }
 </script>
