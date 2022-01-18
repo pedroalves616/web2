@@ -33,7 +33,7 @@
 
             <b-form-group id="input-group-2" label="Your Name:" label-for="input-2">
                 <b-form-input
-                id="input-2"
+                id="input-3"
                 v-model="form.cadastro.nome"
                 placeholder="Enter nome"
                 required
@@ -42,7 +42,7 @@
 
             <b-form-group id="input-group-2" label="Your Password:" label-for="input-2">
                 <b-form-input
-                id="input-2"
+                id="input-4"
                 v-model="form.cadastro.password"
                 placeholder="Enter password"
                 required
@@ -51,7 +51,7 @@
             
             <b-form-group id="input-group-2" label="Your Login:" label-for="input-2">
                 <b-form-input
-                id="input-2"
+                id="input-5"
                 v-model="form.cadastro.login"
                 placeholder="Enter login"
                 required
@@ -60,7 +60,7 @@
 
              <b-form-group id="input-group-2" label="Your idequipe:" label-for="input-2">
                 <b-form-input
-                id="input-2"
+                id="input-6"
                 v-model="form.cadastro.idequipe"
                 placeholder="Enter idequipe"
                 type="number"
@@ -76,6 +76,7 @@
 </template>
 
 <script>
+
   
   export default {
     data() {
@@ -104,6 +105,7 @@
         this.$http.post(baseURI, {login: this.form.login.email, password: this.form.login.password})
         .then((result) => {
           console.log(result.data.token)
+          
           document.cookie = `token=${result.data.token}`;
           //console.log(document.cookie.split('=')[1])
           this.$router.push({ path: '/home' })
@@ -125,21 +127,15 @@
       },
       adicionarNovoUsuario(){
         console.log(document.cookie)
-        // this.$http.post(process.env.VUE_APP_ENDPOINT + '/usuarios', 
-        //     {
-        //         nome: this.form.cadastro.nome, 
-        //         password: this.form.cadastro.password,
-        //         login: this.form.cadastro.login,
-        //         idequipe: this.form.cadastro.idequipe,
-        //         ativo: 1
-        //     },
-        //     {
-        //       headers: {
-        //           'Content-Type': 'application/json',
-        //           'x-access-token': "'"+document.cookie.split('=')[1]+"'",
-        //           'Authorization': `Basic ${token}`
-        //       }
-        // })
+        this.$http.post(process.env.VUE_APP_ENDPOINT + '/cadastroUsuarios', 
+            {
+                nome: this.form.cadastro.nome, 
+                password: this.form.cadastro.password,
+                login: this.form.cadastro.login,
+                idequipe: this.form.cadastro.idequipe,
+                ativo: 1
+            }
+        )
 
         this.$bvModal.hide('modal-1')
 

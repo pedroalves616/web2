@@ -32,9 +32,40 @@
                             <b-icon stacked icon="trash"></b-icon>
                         </b-iconstack>
                     </b-button>
+                    <b-button size="sm" v-b-modal.modal-2 variant="info" @click="form.update.idUpdate = items.item.Id">
+                        <b-iconstack font-scale="1">
+                            <b-icon stacked icon="pencil-fill"></b-icon>
+                        </b-iconstack>
+                    </b-button>
                 </template>
         
         </b-table>
+
+        <b-modal id="modal-2" title="BootstrapVue">
+            <b-form @submit="onSubmit" @reset="onReset" v-if="show">
+
+            <b-form-group id="input-group-2" label="Your Name:" label-for="input-2">
+                <b-form-input
+                id="input-3"
+                v-model="form.update.nome"
+                placeholder="Enter nome"
+                required
+                ></b-form-input>
+            </b-form-group>
+
+            <b-form-group id="input-group-2" label="Your Name:" label-for="input-2">
+                <b-form-input
+                id="input-4"
+                v-model="form.update.ativo"
+                placeholder="Enter nome"
+                required
+                ></b-form-input>
+            </b-form-group>
+
+            <b-button type="submit" variant="primary" @click="alterarEquipe()">Submit</b-button>
+            <b-button type="reset" variant="danger">Reset</b-button>
+            </b-form>
+        </b-modal>
     </div>
 </template>
 
@@ -46,7 +77,12 @@ export default {
         items:[],
         form: {
             nome: '', 
-            ativo: 1
+            ativo: 1,
+            update:{
+                idUpdate:'',
+                nome: '', 
+                ativo: 1
+            }
         },
         show: true,
         fields: [
@@ -108,9 +144,15 @@ export default {
             {
                 nome: this.form.nome, 
                 ativo: this.form.ativo
+            },{
+            headers: {
+                  'Content-Type': 'application/json',
+                  'x-access-token': "'"+document.cookie.split('=')[1]+"'",
+                  'Authorization': `Bearer ${document.cookie.split('=')[1]}`
+                  
             }
-        )
-
+            })
+        window.location.reload()
         this.$bvModal.hide('modal-1')
         this.$http.get(process.env.VUE_APP_ENDPOINT + '/equipes')
         .then((result) => {
@@ -134,6 +176,23 @@ export default {
        
         this.$http.delete(process.env.VUE_APP_ENDPOINT + '/equipes', { data: { id: id } })
         window.location.reload()
+        },
+      alterarEquipe(){
+            this.$http.put(process.env.VUE_APP_ENDPOINT + '/equipes', 
+            {
+                id: this.form.update.idUpdate,
+                nome: this.form.update.nome, 
+                ativo: this.form.update.ativo
+            },
+            {
+              headers: {
+                  'Content-Type': 'application/json',
+                  'x-access-token': "'"+document.cookie.split('=')[1]+"'",
+                  'Authorization': `Bearer ${document.cookie.split('=')[1]}`
+                  
+              }
+            })
+            window.location.reload()
         }
     },
     

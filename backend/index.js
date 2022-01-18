@@ -2,6 +2,7 @@ const express = require('express')
 const app = express()
 const cors = require('cors');
 const Sequelize = require('sequelize');
+require('dotenv').config();
 const sequelize = new Sequelize({
     dialect: 'sqlite',
     storage: 'database.sqlite'
@@ -11,6 +12,7 @@ var jwt = require('jsonwebtoken');
 
 const equipes = require('./models/m2_equipes.js')
 const usuarios = require('./models/m2_usuarios.js');
+const e = require('express');
 
 usuarios.belongsTo(equipes, { foreignKey: 'idequipe' })
 app.listen(5500, () => console.log('Rodando na porta 5500'))
@@ -26,7 +28,7 @@ app.use((req, res, next) => {
 });
 app.use(express.json())
 
-// m2_equipes.create({
+// equipes.create({
 //     nome: 'teste',
 //     ativo: 1
 // })
@@ -39,20 +41,35 @@ app.use(express.json())
 // })
 
 function verifyJWT(req, res, next){
-    const authHeader = req.headers['authorization']
-    const token = authHeader && authHeader.split(' ')[1]
-    if (token == null){ 
-        return res.sendStatus(401)
+    const bearerHearder = req.headers['authorization'];  
+    console.log(bearerHearder)
+    //check if bearer is undefined  
+    const bearer = bearerHearder.split(' ');  
+        //Get the token from array  
+    const bearerToken = bearer[1];  
+
+    console.log(typeof bearerToken)
+    if (bearerToken != 'undefined') {
+        jwt.verify(bearerToken, process.env.JWT_SECRET_KEY ,(err,authData)=>{  
+            if(err){  
+                res.sendStatus(403);  
+            }else{  
+                res.sendStatus(200);
+            }  
+        }); 
+        next();  
     }
-    jwt.verify(token, 'my-32-character-ultra-secure-and-ultra-long-secret', (err, user) => {
-        if (err) return res.sendStatus (403)
-        req.id = user
-        next()
-    })
+    else{
+        res.sendStatus(403)
+    }
+        
+    
+    //Next middleware  
+     
 }
 
 //console.log(m2_equipes)
-app.route('/login').post((req, res) => 
+app.post('/login' , (req, res) => 
     usuarios.findAll({
         include: [
             {
@@ -72,7 +89,7 @@ app.route('/login').post((req, res) =>
             res.json({ auth:true, token });
         }
         else{
-            res.json('chupa rodrigames')
+            res.json('Usuario autenticado')
         }
     })
 )
@@ -96,10 +113,9 @@ app.route('/usuarios').get((req, res) =>
         res.json(usuarios);
     })
 })
-
-app.post('/usuarios', verifyJWT,(req, res) => 
+app.post('/cadastroUsuarios', (req, res) => 
     {
-        console.log(req.userId)
+        
         usuarios.create({
             nome: req.body.nome, 
             password: req.body.password,
@@ -110,7 +126,20 @@ app.post('/usuarios', verifyJWT,(req, res) =>
         res.json('usuario cadastrado com sucesso !') 
     }
 )
-app.post('/usuarios/', verifyJWT, (req, res) => 
+app.post('/usuarios', verifyJWT,(req, res) => 
+    {
+        console.log(req.userId)
+        usuarios.create({
+            nome: req.body.nome, 
+            password: req.body.password,
+            login: req.body.login,
+            idequipe: req.body.idequipe,
+            ativo: req.body.ativo 
+        })
+        
+    }
+)
+app.put('/usuarios', verifyJWT, (req, res) => 
     {
         usuarios.update({
             nome: req.body.nome, 
@@ -121,16 +150,16 @@ app.post('/usuarios/', verifyJWT, (req, res) =>
         },
         {
             where: {
-                id:req.body.usuarioId
+                id:req.body.Id
             }
         }
         ).then(function () {
-            res.json("usuario atualizado")
+            
         }) 
     }
 )
 
-app.delete('/usuarios/', verifyJWT, (req, res) => 
+app.delete('/teste', verifyJWT, (req, res) => 
     {
         console.log(req.body.id)
         usuarios.update({
@@ -142,7 +171,7 @@ app.delete('/usuarios/', verifyJWT, (req, res) =>
             }
         }
         ).then(function () {
-            res.json("usuario desativado")
+            console.log('ok')
         }) 
     }
 )
@@ -161,7 +190,6 @@ app.post('/equipes/', verifyJWT,(req, res) =>
             nome: req.body.nome, 
             ativo: req.body.ativo 
         })
-        res.json('equipe cadastrada com sucesso !') 
     }
 )
 app.put('/equipes/', verifyJWT, (req, res) => 
@@ -176,7 +204,7 @@ app.put('/equipes/', verifyJWT, (req, res) =>
             }
         }
         ).then(function () {
-            res.json("equipe atualizada")
+            
         }) 
     }
 )
@@ -192,7 +220,6 @@ app.delete('/equipes/', verifyJWT, (req, res) =>
             }
         }
         ).then(function () {
-            res.json("equipe desativada")
         }) 
     }
 )

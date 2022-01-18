@@ -18,6 +18,7 @@
   "homepage": "https://github.com/Alexandre96dev/projetoM2Digital#readme",
   "dependencies": {
     "cors": "^2.8.5",
+    "dotenv": "^14.2.0",
     "express": "^4.17.2",
     "jsonwebtoken": "^8.5.1",
     "sequelize": "^6.12.5",
