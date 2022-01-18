@@ -156,10 +156,18 @@ export default {
                 login: this.form.login,
                 idequipe: this.form.idequipe,
                 ativo: this.form.ativo
-            }
-        )
+            },
+            {
+              headers: {
+                  'Content-Type': 'application/json',
+                  'x-access-token': "'"+document.cookie.split('=')[1]+"'",
+                  'Authorization': `Basic ${document.cookie.split('=')[1]}`
+                  
+              }
+            })
 
         this.$bvModal.hide('modal-1')
+        window.location.reload()
         this.$http.get(process.env.VUE_APP_ENDPOINT + '/usuarios')
         .then((result) => {
           
@@ -187,9 +195,23 @@ export default {
       },
       deletarUsuario(id){
         console.log(typeof id)
-       
-        this.$http.delete(process.env.VUE_APP_ENDPOINT + '/usuarios', { data: { id: id } })
-        window.location.reload()
+        console.log(document.cookie.split('=')[1])
+        this.$http.delete(process.env.VUE_APP_ENDPOINT + '/usuarios', 
+            { 
+                data: { 
+                    id: id 
+                } 
+            },
+            {
+              headers: {
+                  'Content-Type': 'application/json',
+                  'x-access-token': "'"+document.cookie.split('=')[1]+"'",
+                  'Authorization': `Basic ${document.cookie.split('=')[1]}`
+                  
+              }
+            }
+        )
+        //window.location.reload()
         }
     },
     

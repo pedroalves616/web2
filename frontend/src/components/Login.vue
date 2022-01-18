@@ -100,33 +100,14 @@
     methods: {
       onSubmit(event) {
         event.preventDefault()
-        const baseURI = process.env.VUE_APP_ENDPOINT + '/usuarios'
-        this.$http.get(baseURI)
+        const baseURI = process.env.VUE_APP_ENDPOINT + '/login'
+        this.$http.post(baseURI, {login: this.form.login.email, password: this.form.login.password})
         .then((result) => {
-          console.log(baseURI)
-          console.log(result.data)
-          var arr = result.data
-          this.infoUsers = arr
-          for (var index = 0; index < arr.length; index++) {
-            if(arr[index].login == this.form.login.email && arr[index].login == this.form.login.password){
-              console.log('ok')
-              
-              this.login = 1
-            }
-            else{
-              if(this.login != 1){
-                this.login = 0
-              }
-            }
-            
-          }
-          console.log(this.infoUsers)
-          if(this.login == 1){
-            this.$router.push({name: 'Home'})
-          }
-          else{
-            alert('Não foi possivel logar')
-          }
+          console.log(result.data.token)
+          document.cookie = `token=${result.data.token}`;
+          //console.log(document.cookie.split('=')[1])
+          this.$router.push({ path: '/home' })
+
          
         })
         //alert(JSON.stringify(this.form))
@@ -143,15 +124,22 @@
         })
       },
       adicionarNovoUsuario(){
-        this.$http.post(process.env.VUE_APP_ENDPOINT + '/usuarios', 
-            {
-                nome: this.form.cadastro.nome, 
-                password: this.form.cadastro.password,
-                login: this.form.cadastro.login,
-                idequipe: this.form.cadastro.idequipe,
-                ativo: 1
-            }
-        )
+        console.log(document.cookie)
+        // this.$http.post(process.env.VUE_APP_ENDPOINT + '/usuarios', 
+        //     {
+        //         nome: this.form.cadastro.nome, 
+        //         password: this.form.cadastro.password,
+        //         login: this.form.cadastro.login,
+        //         idequipe: this.form.cadastro.idequipe,
+        //         ativo: 1
+        //     },
+        //     {
+        //       headers: {
+        //           'Content-Type': 'application/json',
+        //           'x-access-token': "'"+document.cookie.split('=')[1]+"'",
+        //           'Authorization': `Basic ${token}`
+        //       }
+        // })
 
         this.$bvModal.hide('modal-1')
 
